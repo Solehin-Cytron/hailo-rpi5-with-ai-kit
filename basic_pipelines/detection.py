@@ -28,7 +28,7 @@ class user_app_callback_class(app_callback_class):
         self.new_variable = 42  # New variable example
     
     def new_function(self):  # New function example
-        return "The meaning of life is: "
+        return "Let's Count People here: "
 
 # -----------------------------------------------------------------------------------------------
 # User-defined callback function
@@ -60,21 +60,31 @@ def app_callback(pad, info, user_data):
     detections = roi.get_objects_typed(hailo.HAILO_DETECTION)
     
     # Parse the detections
-    detection_count = 0
+    person_count = 0
+    car_count = 0
     for detection in detections:
         label = detection.get_label()
         bbox = detection.get_bbox()
         confidence = detection.get_confidence()
         if label == "person":
-            string_to_print += f"Detection: {label} {confidence:.2f}\n"
-            detection_count += 1
+            string_to_print += f"Persons: {label} {confidence:.2f}\n"
+            person_count += 1
+#         if label == "person":
+#             string_to_print += f"Persons: {label} {confidence:.2f}\n"
+#             person_count += 1
+        elif label == "car":
+            string_to_print += f"Cars: {label} {confidence:.2f}\n"
+            car_count += 1
+    string_to_print += f"Persons: {person_count}, Cars: {car_count}\n"
+    
     if user_data.use_frame:
         # Note: using imshow will not work here, as the callback function is not running in the main thread
         # Let's print the detection count to the frame
-        cv2.putText(frame, f"Detections: {detection_count}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+        cv2.putText(frame, f"Persons: {person_count}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+        cv2.putText(frame, f"Cars: {car_count}", (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
         # Example of how to use the new_variable and new_function from the user_data
         # Let's print the new_variable and the result of the new_function to the frame
-        cv2.putText(frame, f"{user_data.new_function()} {user_data.new_variable}", (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+#         cv2.putText(frame, f"{user_data.new_function()} {user_data.new_variable}", (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
         # Convert the frame to BGR
         frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
         user_data.set_frame(frame)
@@ -223,3 +233,5 @@ if __name__ == "__main__":
     args = parser.parse_args()
     app = GStreamerDetectionApp(args, user_data)
     app.run()
+
+
